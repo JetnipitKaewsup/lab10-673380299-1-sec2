@@ -1,11 +1,12 @@
 package com.example.lab10.service;
 
-import com.example.lab10.model.Product;
-import com.example.lab10.repository.ProductRepository;
-
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+
+import com.example.lab10.model.Product;
+import com.example.lab10.repository.ProductRepository;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,68 +36,41 @@ public class ProductService {
     }
 
     // ── 1. ดึง Product 1 รายการ ──────────────────────────
-    /**
-     * TODO: เรียก repository.findById(id) แล้วคืนผล
-     * ถ้าไม่พบให้ throw RuntimeException("Product not found: " + id)
-     *
-     * Hint: repository.findById(id)
-     * .switchIfEmpty(Mono.error(new RuntimeException(...)))
-     */
     public Mono<Product> getById(String id) {
-        return repository.findById(id)
+        return repository.findById(id) // ค้นหาจาก id
+                // ถ้า Repository ไม่พบข้อมูล
+                // ให้เปลี่ยนจาก Mono.empty() เป็น Error
                 .switchIfEmpty(Mono.error(new RuntimeException("Product not found: " + id)));
     }
 
     // ── 2. ดึง Product ทั้งหมด ───────────────────────────
-    /**
-     * TODO: เรียก repository.findAll() แล้วคืนผล
-     */
     public Flux<Product> getAll() {
         return repository.findAll();
     }
 
     // ── 3. บันทึก Product ────────────────────────────────
-    /**
-     * TODO: เรียก repository.save(product) แล้วคืนผล
-     *
-     * เพิ่มเติม: ถ้า product.getId() เป็น null ให้ generate id ใหม่
-     * Hint: java.util.UUID.randomUUID().toString()
-     */
     public Mono<Product> save(Product product) {
+        // ถ้า Product ยังไม่มี id ให้สร้าง id ใหม่
         if (product.getId() == null) {
             product.setId(UUID.randomUUID().toString());
         }
-
+        // ส่ง Product ให้ Repository บันทึก
         return repository.save(product);
     }
 
     // ── 4. ลบ Product ────────────────────────────────────
-    /**
-     * TODO: เรียก repository.deleteById(id) แล้วคืนผล
-     */
     public Mono<Void> delete(String id) {
-        // TODO: เติม code ตรงนี้
-        return repository.deleteById(id);
+        return repository.deleteById(id); // ลบ Product ตาม id
     }
 
     // ── 5. กรองตาม category ──────────────────────────────
-    /**
-     * TODO: เรียก repository.findByCategory(category) แล้วคืนผล
-     */
     public Flux<Product> getByCategory(String category) {
-        // TODO: เติม code ตรงนี้
-        return repository.findByCategory(category);
+        return repository.findByCategory(category); // ค้นหา Product ตาม Category
     }
 
     // ── 6. คำนวณราคาหลังส่วนลด ───────────────────────────
-    /**
-     * TODO: หา Product จาก id แล้วคืน discountedPrice
-     *
-     * Hint: getById(id)
-     * .map(p -> p.getDiscountedPrice())
-     */
     public Mono<Double> getDiscountedPrice(String id) {
-     
-        return getById(id).map(p -> p.getDiscountedPrice());
+        return getById(id) // getById() ได้ Mono<Product>
+                .map(p -> p.getDiscountedPrice()); // แปลง Product เป็นราคาหลังส่วนลด
     }
 }
